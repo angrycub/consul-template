@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 	"text/template"
 
-	"github.com/pkg/errors"
-
+	"github.com/Masterminds/sprig"
 	dep "github.com/hashicorp/consul-template/dependency"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -301,6 +301,16 @@ func funcMap(i *funcMapInput) template.FuncMap {
 		"modulo":   modulo,
 		"minimum":  minimum,
 		"maximum":  maximum,
+	}
+
+	// Add the Sprig functions to the funcmap
+	for k, v := range sprig.FuncMap() {
+		target := k
+		if r[target] != nil {
+			// Decorate function names that conflict
+			target = target + "_sprig"
+		}
+		r[target] = v
 	}
 
 	for _, bf := range i.functionDenylist {
